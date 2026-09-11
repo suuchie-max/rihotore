@@ -3,6 +3,7 @@ import { POINTS_PER_YEN } from '../data/exercises';
 import { type AppState, pointsToYen, unredeemedPoints } from '../lib/state';
 import { getPitch, getVoiceName, japaneseVoices, setPitch, setVoiceName, speak } from '../lib/media';
 import { isBgmPlaying, startBgm, stopBgm } from '../lib/bgm';
+import { configured, isParentMode, shareUrl } from '../lib/sync';
 
 interface Props { state: AppState; update: (fn: (s: AppState) => AppState) => void }
 
@@ -72,6 +73,11 @@ export default function Settings({ state, update }: Props) {
       <div className="card col gap-s">
         <button className="btn ghost" onClick={() => setParentOpen(o => !o)}>おうちの人メニュー {parentOpen ? '▲' : '▼'}</button>
         {parentOpen && (<>
+          {configured() && (<>
+            <div className="muted small">おうちの人のスマホでこのリンクを開くと、記録を見られるよ。</div>
+            <button className="btn secondary" onClick={async () => { const url = shareUrl('parent'); try { if (navigator.share) await navigator.share({ title: '梨歩トレ(おうちの人用)', url }); else { await navigator.clipboard.writeText(url); alert('コピーしました'); } } catch { /* cancelled */ } }}>おうちの人用リンクを送る</button>
+            {isParentMode() && <div className="muted tiny">この端末は「おうちの人モード」です。</div>}
+          </>)}
           <div className="muted small">まだもらってないpt: <b>{unredeemed}</b>({pointsToYen(unredeemed)}円)</div>
           <button className="btn outline" disabled={!canCash} onClick={() => update(s => {
             s.cashouts.push({ at: new Date().toISOString(), points: POINTS_PER_YEN.points, yen: POINTS_PER_YEN.yen });

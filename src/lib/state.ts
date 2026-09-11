@@ -34,6 +34,7 @@ export interface AppState {
   days: Record<string, DayRecord>;
   cashouts: Cashout[];
   settings: { notifyTime?: string };
+  updated?: Record<string, string>;   // 同期用: key('meta' | 'day:YYYY-MM-DD') -> 最終更新時刻
 }
 
 const KEY = 'riho-tore-v1';
@@ -160,12 +161,32 @@ export function nextExerciseIndex(round: RoundRecord): number {
   return TRAINING.findIndex(e => !round.done[e.id]);
 }
 
+// ---- 変更されたキーを見つけて更新時刻を打つ(同期用) ----
+export function stampChanges(prev: AppState, next: AppState): string[] {
+  const changed: string[] = [];
+  const now = new Date().toISOString();
+  next.updated = { ...(next.updated ?? {}) };
+  const metaPrev = JSON.stringify([prev.cashouts, prev.settings, prev.character]);
+  const metaNext = JSON.stringify([next.cashouts, next.settings, next.character]);
+  if (metaPrev !== metaNext) { next.updated['meta'] = now; changed.push('meta'); }
+  const keys = new Set([...Object.keys(prev.days), ...Object.keys(next.days)]);
+  for (const k of keys) {
+    if (JSON.stringify(prev.days[k]) !== JSON.stringify(next.days[k])) { next.updated[`day:${k}`] = now; changed.push(`day:${k}`); }
+  }
+  return changed;
+}
+
 // ---- React hook ----
-export function useAppState(): [AppState, (fn: (s: AppState) => AppState) => void] {
+export function useAppState(onChange?: (state: AppState, keys: string[]) => void): [AppState, (fn: (s: AppState) => AppState) => void, (s: AppState) => void] {
   const [state, setState] = useState<AppState>(loadState);
   useEffect(() => { saveState(state); }, [state]);
-  const update = (fn: (s: AppState) => AppState) => setState(prev => fn(structuredClone(prev)));
-  return [state, update];
+  const update = (fn: (s: AppState) => AppState) => setState(prev => {
+    const next = fn(structuredClone(prev));
+    const keys = stampChanges(prev, next);
+    if (keys.length && onChange) onChange(next, keys);
+    return next;
+  });
+  return [state, update, setState];
 }
 
 export function fmtSec(sec: number): string {

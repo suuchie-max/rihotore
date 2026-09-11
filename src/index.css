@@ -198,3 +198,9 @@ main.full { padding-bottom: 0; }
 .round-btn.bgm.on { color: var(--lavender-ink); background: var(--lavender); }
 select.input { font: inherit; padding: 10px 12px; border: 2px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); width: 100%; }
 input[type=range] { width: 100%; accent-color: var(--accent); }
+
+.icon-box.small { width: 32px; height: 32px; border-radius: 10px; }
+.icon-box.off { background: #f1ebe8; color: #c9b5ba; }
+.icon-box .dash { font-weight: 900; }
+.status b { font-size: 14px; }
+button.pill { min-height: 36px; }

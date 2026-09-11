@@ -9,7 +9,9 @@ export type Route =
   | { name: 'zukan' }
   | { name: 'passbook' }
   | { name: 'settings' }
-  | { name: 'zukan-item'; id: string };
+  | { name: 'zukan-item'; id: string }
+  | { name: 'link'; mode: 'child' | 'parent'; token: string }
+  | { name: 'parent-home' };
 
 function parse(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
@@ -21,6 +23,9 @@ function parse(hash: string): Route {
     case 'zukan': return parts[1] ? { name: 'zukan-item', id: parts[1] } : { name: 'zukan' };
     case 'passbook': return { name: 'passbook' };
     case 'settings': return { name: 'settings' };
+    case 'u': return parts[1] ? { name: 'link', mode: 'child', token: parts[1] } : { name: 'home' };
+    case 'p': return parts[1] ? { name: 'link', mode: 'parent', token: parts[1] } : { name: 'home' };
+    case 'parent': return { name: 'parent-home' };
     default: return { name: 'home' };
   }
 }
