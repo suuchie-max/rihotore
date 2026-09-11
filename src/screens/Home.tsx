@@ -8,6 +8,8 @@ import {
   keyToDate, nextExerciseIndex, pointsToYen, scheduleFor, streak, todayKey, totalPoints, unredeemedPoints, weekPoints,
 } from '../lib/state';
 import { unlockAudio } from '../lib/media';
+import { startBgm } from '../lib/bgm';
+import { bgmPreferred } from '../components/BgmButton';
 import { POINTS_PER_YEN } from '../data/exercises';
 
 interface Props { state: AppState; update: (fn: (s: AppState) => AppState) => void }
@@ -37,6 +39,7 @@ export default function Home({ state, update }: Props) {
 
   const startTraining = () => {
     unlockAudio();
+    if (bgmPreferred()) startBgm();
     update(s => {
       const dd = getDay(s, key);
       if (!activeRound(dd) && completedRounds(dd) < MAX_ROUNDS) dd.rounds.push({ startedAt: new Date().toISOString(), done: {} });

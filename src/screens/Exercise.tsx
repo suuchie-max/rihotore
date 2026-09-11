@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { REST_SEC, TRAINING, VIDEOS, type Exercise } from '../data/exercises';
 import YouTube from '../components/YouTube';
+import BgmButton, { bgmPreferred } from '../components/BgmButton';
+import { startBgm, stopBgm } from '../lib/bgm';
 import { IconBack, IconCheck, IconClock, IconSpeaker } from '../components/Icons';
 import { go } from '../lib/router';
 import { beep, speak, stopSpeaking, vibrate } from '../lib/media';
@@ -66,7 +68,7 @@ export default function ExerciseScreen({ state, update }: Props) {
     return () => clearInterval(t);
   }, [countdown?.set, ex?.id]);
 
-  useEffect(() => () => stopSpeaking(), []);
+  useEffect(() => { if (bgmPreferred()) startBgm(); return () => { stopSpeaking(); stopBgm(); }; }, []);
 
   if (!round || !ex) {
     // 周が終わっている、または開始されていない
@@ -121,7 +123,10 @@ export default function ExerciseScreen({ state, update }: Props) {
           <div className="muted small">{roundNo}周目 · {doneCount + 1} / {TRAINING.length}</div>
           <div className="dots">{TRAINING.map((e, i) => <span key={e.id} className={i < doneCount ? 'on' : ''} />)}</div>
         </div>
-        <div className="pill small"><IconClock size={16} /><span>{fmtSec(roundTotal)}</span></div>
+        <div className="row gap-s">
+          <BgmButton />
+          <div className="pill small"><IconClock size={16} /><span>{fmtSec(roundTotal)}</span></div>
+        </div>
       </header>
 
       <div className="video-wrap">

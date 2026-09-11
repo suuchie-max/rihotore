@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { stopBgm } from '../lib/bgm';
 import { MAX_ROUNDS, POINTS_PER_YEN } from '../data/exercises';
 import { DONE_MESSAGES, pickMessage } from '../data/messages';
 import Character from '../components/Character';
@@ -24,6 +25,7 @@ export default function RoundDone({ state, update }: Props) {
   const unredeemed = unredeemedPoints(state);
   const toYen = POINTS_PER_YEN.points - (unredeemed % POINTS_PER_YEN.points || POINTS_PER_YEN.points);
   const [mood, setMood] = useState<Mood | undefined>(day.mood);
+  useEffect(() => { stopBgm(); }, []);
 
   // 前回の同じ周との比較
   const prevDays = Object.values(state.days).filter(d => d.date < key && d.rounds.some(r => r.doneAt)).sort((a, b) => (a.date < b.date ? 1 : -1));

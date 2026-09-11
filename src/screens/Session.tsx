@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { HIT_MOVES, STRETCH_PARTS, VIDEOS } from '../data/exercises';
 import YouTube from '../components/YouTube';
+import BgmButton from '../components/BgmButton';
+import { stopBgm } from '../lib/bgm';
 import { IconBack, IconCheck, IconClock } from '../components/Icons';
 import { go } from '../lib/router';
 import { beep, vibrate } from '../lib/media';
@@ -21,7 +23,7 @@ export default function Session({ kind, state, update }: Props) {
 
   useEffect(() => {
     const t = setInterval(() => setElapsed(Math.floor((Date.now() - startRef.current) / 1000)), 500);
-    return () => clearInterval(t);
+    return () => { clearInterval(t); stopBgm(); };
   }, []);
 
   const finish = () => {
@@ -44,7 +46,10 @@ export default function Session({ kind, state, update }: Props) {
           <div className="muted small">{kind === 'stretch' ? 'ストレッチ' : 'HIT(おまけ)'}</div>
           <b>{video.title}</b>
         </div>
-        <div className="pill small"><IconClock size={16} /><span>{fmtSec(elapsed)}</span></div>
+        <div className="row gap-s">
+          <BgmButton />
+          <div className="pill small"><IconClock size={16} /><span>{fmtSec(elapsed)}</span></div>
+        </div>
       </header>
 
       <div className="video-wrap">
