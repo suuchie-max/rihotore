@@ -87,7 +87,7 @@ export default function Settings({ state, update }: Props) {
         </>)}
       </div>
 
-      <div className="muted tiny center">梨歩トレ(仮) v0.2</div>
+      <div className="muted tiny center">梨歩トレ(仮) v0.3</div>
     </div>
   );
 }

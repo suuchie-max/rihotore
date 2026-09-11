@@ -204,3 +204,4 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .icon-box .dash { font-weight: 900; }
 .status b { font-size: 14px; }
 button.pill { min-height: 36px; }
+.btn:disabled { opacity: 0.45; box-shadow: none; }
