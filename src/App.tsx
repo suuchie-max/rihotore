@@ -14,6 +14,31 @@ import Session from './screens/Session';
 import Settings from './screens/Settings';
 import { Zukan, ZukanItem } from './screens/Zukan';
 
+// 同期やReactの起動より先に接続先を確定する。
+const incoming = location.hash.match(/^#\/(p|u)\/([a-z0-9]{20})$/);
+if (incoming) {
+  const previous = getToken();
+  if (previous !== incoming[2]) {
+    const saved = localStorage.getItem('riho-tore-v1');
+    if (saved) localStorage.setItem(`riho-tore-backup-${previous ?? 'unlinked'}-${Date.now()}`, saved);
+    localStorage.removeItem('riho-tore-v1');
+  }
+  setToken(incoming[2]);
+  setParentMode(incoming[1] === 'p');
+  history.replaceState(null, '', location.pathname + location.search + (incoming[1] === 'p' ? '#/parent' : '#/'));
+}
+
+function reconnectParent() {
+  const value = window.prompt('おうちの人用リンクを貼り付けてください');
+  if (!value) return;
+  try {
+    const url = new URL(value.trim());
+    if (url.origin !== location.origin || url.pathname !== location.pathname || !/^#\/p\/[a-z0-9]{20}$/.test(url.hash)) throw new Error();
+    location.hash = url.hash;
+    location.reload();
+  } catch { window.alert('梨歩トレのおうちの人用リンクを、そのまま貼り付けてください。'); }
+}
+
 // 初回: 同期が使える環境なら家族トークンを作っておく
 if (SUPABASE_URL && !getToken()) setToken(newToken());
 
@@ -64,17 +89,10 @@ export default function App() {
     return () => { document.removeEventListener('visibilitychange', onVis); clearInterval(t); };
   }, [pull, parent]);
 
-  // 共有リンクを開いたとき: トークンとモードを保存してホームへ
+  // 動作中にリンクが開かれた場合も、同期前の初期化へ戻す。
   useEffect(() => {
-    if (route.name === 'link') {
-      setToken(route.token);
-      setParentMode(route.mode === 'parent');
-      // 送信待ちを捨てて、新しい家族のデータを取りに行く
-      pending.current.clear();
-      go(route.mode === 'parent' ? 'parent' : '');
-      setTimeout(pull, 100);
-    }
-  }, [route, pull]);
+    if (route.name === 'link') location.reload();
+  }, [route]);
 
   const fullscreen = route.name === 'exercise' || route.name === 'round-done' || route.name === 'session' || route.name === 'zukan-item';
 
@@ -101,7 +119,12 @@ export default function App() {
 
   return (
     <div className="app">
-      <main className={fullscreen ? 'full' : ''}>{body}</main>
+      <main className={fullscreen ? 'full' : ''}>{body}
+        {!fullscreen && <div style={{ padding: '12px 20px 24px' }}>
+          <button className="btn secondary" onClick={reconnectParent}>おうちの人の記録に接続</button>
+          <p className="muted small">ホーム画面から開いて記録が見えないときは、ここにおうちの人用リンクを登録してください。</p>
+        </div>}
+      </main>
       {!fullscreen && (
         <nav className="tabs">
           {tab(parent ? 'parent' : '', parent ? '今日' : 'ホーム', <IconHome />, route.name === 'home' || route.name === 'parent-home')}
