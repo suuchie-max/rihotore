@@ -1,3 +1,4 @@
+import { STUDY_SUBJECTS } from '../lib/state';
 import { useState } from 'react';
 import { type AppState, WEEKDAY_JA, dayPoints, fmtSec, getDay, streak, todayKey, totalPoints, trainingGrade, GRADE_NAME } from '../lib/state';
 
@@ -50,6 +51,7 @@ export default function Calendar({ state }: Props) {
                 {p.hit > 0 && <span className="dot lavender" />}
                 {p.practice > 0 && <span className="dot sky" />}
                 {p.wake > 0 && <span className="dot sun" />}
+                {(p.japanese + p.math + p.english > 0) && <span className="dot lavender" title="お勉強" />}
               </span>
             </button>
           );
@@ -65,6 +67,7 @@ export default function Calendar({ state }: Props) {
             {sp.stretch > 0 && <li><span className="dot mint" />ストレッチ {selDay.stretchSec ? fmtSec(selDay.stretchSec) : ''} <b>+1</b></li>}
             {grade > 0 && <li><span className={`medal m${grade} on`} />トレーニング {GRADE_NAME[grade]}({selDay.rounds.filter(r => r.doneAt).length}周) <b>+{grade}</b></li>}
             {sp.hit > 0 && <li><span className="dot lavender" />HIT <b>+1</b></li>}
+            {STUDY_SUBJECTS.map(subject => sp[subject.key] > 0 && <li key={subject.key}><span className="dot lavender" />{subject.label} <b>+1</b></li>)}
           </ul>
         )}
         {selDay.mood && <div className="muted small">調子: {MOOD_JA[selDay.mood]}</div>}

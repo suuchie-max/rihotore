@@ -1,3 +1,4 @@
+import { STUDY_SUBJECTS } from '../lib/state';
 import { useState } from 'react';
 import { POINTS_PER_YEN, TRAINING } from '../data/exercises';
 import { IconCheck } from '../components/Icons';
@@ -63,6 +64,7 @@ export default function Parent({ state, update, syncing, lastSync, onRefresh }: 
           {sch.training && <Row ok={grade > 0} label={`トレーニング ${grade > 0 ? GRADE_NAME[grade] : ''}`} sub={grade > 0 ? `${completedRounds(day)}周` : cur ? `${doneCount}/${TRAINING.length} 種目 やってる途中` : 'まだ'} />}
           {sch.hit && <Row ok={!!day.hitDoneAt} label="HIT" />}
           {sch.practice && <Row ok={!!day.practiceAt} label="チーム練習" />}
+          {STUDY_SUBJECTS.map(subject => <Row key={subject.key} ok={!!day.study?.[subject.key]} label={subject.label} sub={day.study?.[subject.key] ? '+1pt' : 'まだ'} />)}
         </ul>
         {day.mood && <div className="muted small">調子: {MOOD_JA[day.mood]}</div>}
       </div>

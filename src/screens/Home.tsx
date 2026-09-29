@@ -1,3 +1,4 @@
+import { STUDY_SUBJECTS } from '../lib/state';
 import { HIT_ESTIMATE_SEC, MAX_ROUNDS, STRETCH_ESTIMATE_SEC, TRAINING, WAKE_DEADLINE, roundEstimateSec } from '../data/exercises';
 import { OPEN_MESSAGES, pickMessage } from '../data/messages';
 import Character from '../components/Character';
@@ -126,6 +127,21 @@ export default function Home({ state, update }: Props) {
             {!day.hitDoneAt && <IconChevron size={20} />}
           </button>
         )}
+      </section>
+
+      <section className="card col gap-s">
+        <div className="row between"><b>今日のスタンプ · お勉強</b><span className="muted small">各教科 1日1pt</span></div>
+        {STUDY_SUBJECTS.map(subject => (
+          <button key={subject.key} className={`banner ${day.study?.[subject.key] ? 'done' : ''}`}
+            disabled={!!day.study?.[subject.key]}
+            onClick={() => mark(dd => {
+              dd.study = dd.study ?? {};
+              dd.study[subject.key] = dd.study[subject.key] ?? new Date().toISOString();
+            })}>
+            <span className="row">{day.study?.[subject.key] && <IconCheck size={20} />}<b>{subject.label}{day.study?.[subject.key] ? ' できた!' : ''}</b></span>
+            <b className="accent">+1pt</b>
+          </button>
+        ))}
       </section>
 
       <section className="row between pts">

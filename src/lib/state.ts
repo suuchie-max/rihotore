@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { MAX_ROUNDS, POINTS_PER_YEN, SCHEDULE, TRAINING } from '../data/exercises';
 
+export const STUDY_SUBJECTS = [{ key: 'japanese', label: '公文の国語' }, { key: 'math', label: '公文の数学' }, { key: 'english', label: '公文の英語' }] as const;
+export type StudySubject = typeof STUDY_SUBJECTS[number]['key'];
+
 export type Mood = 'hard' | 'ok' | 'easy';
 
 export interface ExerciseDone {
@@ -16,6 +19,7 @@ export interface RoundRecord {
 
 export interface DayRecord {
   date: string;                  // YYYY-MM-DD
+  study?: Partial<Record<StudySubject, string>>;
   wakeAt?: string;
   stretchDoneAt?: string;
   stretchSec?: number;
@@ -84,7 +88,7 @@ export function trainingGrade(day: DayRecord): Grade {
   return Math.min(MAX_ROUNDS, completedRounds(day)) as Grade;
 }
 
-export interface DayPoints { wake: number; stretch: number; training: number; hit: number; practice: number; total: number }
+export interface DayPoints { wake: number; stretch: number; training: number; hit: number; practice: number; japanese: number; math: number; english: number; total: number }
 
 export function dayPoints(day: DayRecord): DayPoints {
   const p: DayPoints = {
@@ -93,9 +97,12 @@ export function dayPoints(day: DayRecord): DayPoints {
     training: trainingGrade(day),
     hit: day.hitDoneAt ? 1 : 0,
     practice: day.practiceAt ? 1 : 0,
+    japanese: day.study?.japanese ? 1 : 0,
+    math: day.study?.math ? 1 : 0,
+    english: day.study?.english ? 1 : 0,
     total: 0,
   };
-  p.total = p.wake + p.stretch + p.training + p.hit + p.practice;
+  p.total = p.wake + p.stretch + p.training + p.hit + p.practice + p.japanese + p.math + p.english;
   return p;
 }
 

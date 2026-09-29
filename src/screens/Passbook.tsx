@@ -1,3 +1,4 @@
+import { STUDY_SUBJECTS } from '../lib/state';
 import { POINTS_PER_YEN } from '../data/exercises';
 import { type AppState, cashedPoints, dayPoints, evolution, pointsToYen, totalPoints, unredeemedPoints, weekPoints } from '../lib/state';
 
@@ -13,8 +14,9 @@ export default function Passbook({ state }: Props) {
   const breakdown = Object.values(state.days).reduce((acc, d) => {
     const p = dayPoints(d);
     acc.wake += p.wake; acc.stretch += p.stretch; acc.training += p.training; acc.hit += p.hit; acc.practice += p.practice;
+    for (const subject of STUDY_SUBJECTS) acc[subject.key] += p[subject.key];
     return acc;
-  }, { wake: 0, stretch: 0, training: 0, hit: 0, practice: 0 });
+  }, { wake: 0, stretch: 0, training: 0, hit: 0, practice: 0, japanese: 0, math: 0, english: 0 });
 
   const recent = Object.values(state.days).filter(d => dayPoints(d).total > 0).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 14);
 
@@ -42,6 +44,7 @@ export default function Passbook({ state }: Props) {
           <li><span className="medal m1 on" />トレーニング <b>{breakdown.training}</b></li>
           <li><span className="dot lavender" />HIT <b>{breakdown.hit}</b></li>
           <li><span className="dot sky" />チーム練習 <b>{breakdown.practice}</b></li>
+          {STUDY_SUBJECTS.map(subject => <li key={subject.key}><span className="dot lavender" />{subject.label} <b>{breakdown[subject.key]}</b></li>)}
         </ul>
       </div>
 
